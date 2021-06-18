@@ -11,9 +11,11 @@
  */
 
 import { execGenSlidesFuncs, runEveryTest } from "../modules/demos.mjs";
-import pptxgen from "pptxgenjs";
+import pptxgen from "../../src/bld/pptxgen.cjs.js"; // "pptxgenjs";
+import { getData, getOptions } from "./exampledata.js";
 
 // ============================================================================
+
 
 const exportName = "PptxGenJS_Demo_Node";
 let pptx = new pptxgen();
@@ -39,13 +41,19 @@ if (process.argv.length > 2) {
 			console.log(`ERROR: ${err}`);
 		});
 } else {
+	let pptx1 = getPptxInstance()
 	// B: Omit an arg to run only these below
-	let slide = pptx.addSlide();
-	slide.addText("New Node Presentation", { x: 1.5, y: 1.5, w: 6, h: 2, margin: 0.1, fill: "FFFCCC" });
-	slide.addShape(pptx.shapes.OVAL_CALLOUT, { x: 6, y: 2, w: 3, h: 2, fill: "00FF00", line: "000000", lineSize: 1 }); // Test shapes availablity
+	let slide = pptx1.addSlide();
+
+	let scatLables = getData();
+	let scatOption = getOptions();
+	
+	slide.addChart(pptx1.charts.SCATTER, scatLables, scatOption);
+	// slide.addText("New Node Presentation", { x: 1.5, y: 1.5, w: 6, h: 2, margin: 0.1, fill: "FFFCCC" });
+	// slide.addShape(pptx.shapes.OVAL_CALLOUT, { x: 6, y: 2, w: 3, h: 2, fill: "00FF00", line: "000000", lineSize: 1 }); // Test shapes availablity
 
 	// EXAMPLE 1: Saves output file to the local directory where this process is running
-	pptx.writeFile({ fileName: exportName })
+	pptx1.writeFile({ fileName: exportName })
 		.catch((err) => {
 			throw new Error(err);
 		})
@@ -57,7 +65,7 @@ if (process.argv.length > 2) {
 		});
 
 	// EXAMPLE 2: Save in various formats - JSZip offers: ['arraybuffer', 'base64', 'binarystring', 'blob', 'nodebuffer', 'uint8array']
-	pptx.write("base64")
+	pptx1.write("base64")
 		.catch((err) => {
 			throw new Error(err);
 		})
@@ -72,6 +80,20 @@ if (process.argv.length > 2) {
 	// **NOTE** If you continue to use the `pptx` variable, new Slides will be added to the existing set
 }
 
+function getPptxInstance() {
+	let instance = new pptxgen();
+
+	instance.layout = "LAYOUT_4x3";
+	instance.defineSlideMaster({
+		title: "MASTER_SLIDE",
+		bkgd: "FFFFFF",
+		margin: [0.5, 0.5, 0.5, 0.5],
+		objects: [],
+		slideNumber: { x: 9.24, y: 6.65, font: "Arial", fontSize: 8, h: 0.53, w: 0.42 }
+	});
+	
+	return instance;
+}
 // ============================================================================
 
 console.log(`\n--------------------==~==~==~==[ ...DEMO COMPLETE ]==~==~==~==--------------------\n\n`);
